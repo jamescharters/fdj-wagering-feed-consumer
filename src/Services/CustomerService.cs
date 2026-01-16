@@ -1,7 +1,7 @@
-using System.Collections.Concurrent;
 using System.Net.Http.Json;
 using Microsoft.Extensions.Options;
 using WageringStatsApi.Models;
+using WageringStatsApi.Repositories;
 
 namespace WageringStatsApi.Services;
 
@@ -10,48 +10,39 @@ public interface ICustomerService
     Task<CustomerInfo?> GetCustomerAsync(long customerId, CancellationToken cancellationToken = default);
 }
 
-public class CustomerService : ICustomerService
+public class CustomerService(
+    HttpClient httpClient,
+    ICustomerRepository customerRepository,
+    IOptions<WageringFeedConfig> config,
+    ILogger<CustomerService> logger)
+    : ICustomerService
 {
-    private readonly HttpClient _httpClient;
-    private readonly WageringFeedConfig _config;
-    private readonly ILogger<CustomerService> _logger;
-
-    // Simple in-memory cache to avoid repeated calls for same customer. Threadsafe.
-    private readonly ConcurrentDictionary<long, CustomerInfo> _cache = new();
-
-    public CustomerService(HttpClient httpClient, IOptions<WageringFeedConfig> config,
-        ILogger<CustomerService> logger)
-    {
-        _httpClient = httpClient;
-        _config = config.Value;
-        _logger = logger;
-    }
+    private readonly WageringFeedConfig _config = config.Value;
 
     public async Task<CustomerInfo?> GetCustomerAsync(long customerId, CancellationToken cancellationToken = default)
     {
-        if (_cache.TryGetValue(customerId, out var cached))
+        if (customerRepository.TryGet(customerId, out var cached))
         {
             return cached;
         }
 
         try
         {
-            // DEVNOTE: ideally this URL construction would be handled by a UriBuilder or similar, but keeping simple here
-            // Also, we would want perhaps an out-of-process caching solution for a real-world service
+            logger.LogDebug("Calling Customer API for {CustomerId}.", customerId);
 
             var url = $"{_config.CustomerApiUrl}?customerId={customerId}&candidateId={Uri.EscapeDataString(_config.CandidateId)}";
-            var response = await _httpClient.GetFromJsonAsync<CustomerInfo>(url, cancellationToken);
+            var response = await httpClient.GetFromJsonAsync<CustomerInfo>(url, cancellationToken);
 
             if (response is not null)
             {
-                _cache.TryAdd(customerId, response);
+                customerRepository.Add(customerId, response);
             }
 
             return response;
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogWarning(ex, "Failed to fetch customer {CustomerId} from API", customerId);
+            logger.LogWarning(ex, "Failed to fetch customer {CustomerId} from API", customerId);
             return null;
         }
     }

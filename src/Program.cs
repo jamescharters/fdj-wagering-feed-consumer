@@ -16,6 +16,7 @@ builder.Services.AddOptions<WageringFeedConfig>()
 
 // Singleton of the core wagering data service so same in-memory structure serves all requests over service lifetime
 builder.Services.AddSingleton<IWageringDataRepository, WageringDataRepository>();
+builder.Services.AddSingleton<ICustomerRepository, CustomerRepository>();
 builder.Services.AddSingleton<IMessageProcessor, MessageProcessor>();
 builder.Services.AddHttpClient<ICustomerService, CustomerService>();
 builder.Services.AddHostedService<WebSocketWorker>();
