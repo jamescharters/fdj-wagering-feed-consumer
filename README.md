@@ -26,8 +26,6 @@ Before running, set the candidate ID in `appsettings.json` or `appsettings.Devel
 
 ```
 
-Other values such as timeouts, buffer sizes, the wagering data WebSocket endpoint can be modified as desired from the provided defaults.
-
 ## Build
 
 ```bash
