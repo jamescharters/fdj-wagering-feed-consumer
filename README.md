@@ -73,6 +73,8 @@ The app will be available at `http://localhost:5000/customer/<customerId>/stats`
 
 ### Assumptions
 
+- Traditional API structure using distinct controllers, repositories, services etc for testability and composability
+- No hard requirement of using a design pattern such as CQRS: the goal here was not to completely overengineer the initial solution; though the code here would be amenable to such a pattern should it be desired
 - "This will only work for the duration of your session" is assumed to mean the API HTTP GET endpoint `/customer/<customerId>/stats` only returns a response payload while the WebSocket session itself is active. In effect, this means the API only provides HTTP 200 range responses for valid customer IDs for about 3 minutes after start. Be quick!
 - TotalStandToWin in the response has no currency conversion, and decimal values rounded to 2 places (i.e. the value corresponds to dollars-and-cents, Euro-and-cents etc)
 - Automatic connection to web socket to receive messages is appropriate on application start, and once EndOfFeed is received (or our own hard timelimit expires), there is no automatic reconnection or even mechanism to re-establish the websocket subscription
@@ -82,18 +84,18 @@ The app will be available at `http://localhost:5000/customer/<customerId>/stats`
 ### Limitations
 
 - In-memory data storage, therefore everything is lost on app restart
+- Customer data, once obtained, is cached for application lifetime and therefore oblivious to changes at the source of truth (e.g. a name update for a customer)
 - Only works as a single instance (multiple instances would each have their own separate data, leading to potentially inconsistent responses basded on which server answers the client query)
 - API returns HTTP 503 once the feed completes (dis/gracefully), which might not be ideal depending on actual real world requirements
-- Web socket reconnection retries forever with a 10 second delay (there is no backoff or circuit breaker logic for this)
-- No auth, rate limiting, or caching (see TODOs/DEVNOTE remarks in the code)
+- No auth, rate limiting, or HTTP request caching (see TODOs/DEVNOTE remarks in the code). These, among other things, would require consideration for real-world usage
 
 ### Potential Extensions
 
 - Persistent storage such as Redis so data survives restarts and permit shared state for horizontal scaling (eg. Redis as backing store)
-- Health check endpoints for container orchestration
-- Metrics/tracing
+- More intelligent caching of customer data, i.e. awareness of expiration or sliding window
+- Internal health check endpoints for more robust container orchestration
+- Metrics/tracing (Azure AppInsights, Prometheus etc)
 - Rate limiting middleware
 - Auth (JWT, client API keys, or some other form)
-- Use Polly library or similar for retry policies with exponential backoff
-- Actual customer name lookup from a database or other appropriate source
 - Secrets management for sensitive config
+- ... others I am sure!
