@@ -1,0 +1,11 @@
+bin/
+obj/
+.git/
+.gitignore
+.idea/
+.vs/
+*.md
+*.user
+*.suo
+WageringFeedConsumer.Tests/
+TestResults/

@@ -1,0 +1,9 @@
+services:
+  app:
+    build: .
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - WageringFeed__CandidateId=${CANDIDATE_ID}
+    restart: unless-stopped

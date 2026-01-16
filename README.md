@@ -4,7 +4,7 @@
 
 This application was developed and tested on macOS. Ensure that the following are installed:
 
-- .NET 10
+- .NET 10 (or Docker)
 
 ## Code
 
@@ -50,6 +50,27 @@ To query a specific customer, invoke a GET (via cURL) or point your web browser 
 
 Swagger UI is available at `http://localhost:5000/swagger` and the OpenAPI spec can be found at `http://localhost:5000/openapi/v1.json`.
 
+## Docker
+
+Alternatively, you can run the application using Docker:
+
+```bash
+# Build the image
+docker build -t wagering-feed-consumer .
+
+# Run the container (use real CANDIDATE_ID)
+docker run -p 5000:8080 -e WageringFeed__CandidateId=CANDIDATE_ID wagering-feed-consumer
+```
+
+Or using Docker Compose:
+
+```bash
+# Set your candidate ID and run
+CANDIDATE_ID=your-id-here docker compose up
+```
+
+The app will be available at `http://localhost:5000/customer/<customerId>/stats`.
+
 ## Design Notes
 
 ### Assumptions
@@ -71,7 +92,6 @@ Swagger UI is available at `http://localhost:5000/swagger` and the OpenAPI spec 
 
 ### Potential Extensions
 
-- Containerisation setup
 - Persistent storage such as Redis so data survives restarts and permit shared state for horizontal scaling (eg. Redis as backing store)
 - Health check endpoints for container orchestration
 - Metrics/tracing
