@@ -1,4 +1,4 @@
-namespace WageringFeedConsumer.Models.WebSockets;
+namespace WageringStatsApi.Models.WebSockets;
 
 public record BetPlacedPayload
 {

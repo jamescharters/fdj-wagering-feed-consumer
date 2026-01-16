@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace WageringFeedConsumer.Models.WebSockets;
+namespace WageringStatsApi.Models.WebSockets;
 
 public record BaseMessage
 {

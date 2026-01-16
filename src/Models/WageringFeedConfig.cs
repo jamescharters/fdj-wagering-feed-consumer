@@ -1,4 +1,4 @@
-namespace WageringFeedConsumer.Models;
+namespace WageringStatsApi.Models;
 
 public class WageringFeedConfig
 {

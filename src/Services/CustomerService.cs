@@ -1,9 +1,9 @@
 using System.Collections.Concurrent;
 using System.Net.Http.Json;
 using Microsoft.Extensions.Options;
-using WageringFeedConsumer.Models;
+using WageringStatsApi.Models;
 
-namespace WageringFeedConsumer.Services;
+namespace WageringStatsApi.Services;
 
 public interface ICustomerService
 {

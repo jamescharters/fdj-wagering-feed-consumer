@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Moq;
-using WageringFeedConsumer.Repositories;
+using WageringStatsApi.Repositories;
 
-namespace WageringFeedConsumer.Tests.Repositories;
+namespace WageringStatsApi.Tests.Repositories;
 
 [TestFixture]
 public class WageringDataRepositoryTests

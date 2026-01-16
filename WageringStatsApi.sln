@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WageringFeedConsumer", "src\WageringFeedConsumer.csproj", "{2969EDD4-B7E1-4E5F-8B4F-3C10D849427E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WageringStatsApi", "src\WageringStatsApi.csproj", "{2969EDD4-B7E1-4E5F-8B4F-3C10D849427E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WageringFeedConsumer.Tests", "tests\WageringFeedConsumer.Tests\WageringFeedConsumer.Tests.csproj", "{B6EEFDC7-D063-4E30-B0E6-660C0A631EE3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WageringStatsApi.Tests", "tests\WageringStatsApi.Tests\WageringStatsApi.Tests.csproj", "{B6EEFDC7-D063-4E30-B0E6-660C0A631EE3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

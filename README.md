@@ -1,4 +1,4 @@
-# Wagering Feed Consumer
+# Wagering Stats API
 
 ## Prerequisites
 
@@ -56,10 +56,10 @@ Alternatively, you can run the application using Docker:
 
 ```bash
 # Build the image
-docker build -t wagering-feed-consumer .
+docker build -t wagering-stats-api .
 
 # Run the container (use real CANDIDATE_ID)
-docker run -p 5000:8080 -e WageringFeed__CandidateId=CANDIDATE_ID wagering-feed-consumer
+docker run -p 5000:8080 -e WageringFeed__CandidateId=CANDIDATE_ID wagering-stats-api
 ```
 
 Or using Docker Compose:

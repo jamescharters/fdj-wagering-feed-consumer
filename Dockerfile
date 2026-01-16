@@ -3,8 +3,8 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 WORKDIR /src
 
 # Copy csproj and restore dependencies (layer caching optimisation)
-COPY src/WageringFeedConsumer.csproj .
-RUN dotnet restore WageringFeedConsumer.csproj
+COPY src/WageringStatsApi.csproj .
+RUN dotnet restore WageringStatsApi.csproj
 
 # Copy source and publish (exclude test project)
 COPY src/Controllers/ Controllers/
@@ -14,7 +14,7 @@ COPY src/Repositories/ Repositories/
 COPY src/Services/ Services/
 COPY src/Program.cs .
 COPY src/appsettings*.json .
-RUN dotnet publish WageringFeedConsumer.csproj -c Release -o /app --no-restore
+RUN dotnet publish WageringStatsApi.csproj -c Release -o /app --no-restore
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS runtime
@@ -43,4 +43,4 @@ ENV ASPNETCORE_URLS=http://+:8080 \
     ASPNETCORE_ENVIRONMENT=Production \
     DOTNET_RUNNING_IN_CONTAINER=true
 
-ENTRYPOINT ["dotnet", "WageringFeedConsumer.dll"]
+ENTRYPOINT ["dotnet", "WageringStatsApi.dll"]

@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using WageringFeedConsumer.Models;
-using WageringFeedConsumer.Repositories;
-using WageringFeedConsumer.Services;
+using WageringStatsApi.Models;
+using WageringStatsApi.Repositories;
+using WageringStatsApi.Services;
 
-namespace WageringFeedConsumer.Controllers;
+namespace WageringStatsApi.Controllers;
 
 [ApiController]
 [Route("")]

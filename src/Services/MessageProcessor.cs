@@ -1,8 +1,8 @@
 using System.Text.Json;
-using WageringFeedConsumer.Models.WebSockets;
-using WageringFeedConsumer.Repositories;
+using WageringStatsApi.Models.WebSockets;
+using WageringStatsApi.Repositories;
 
-namespace WageringFeedConsumer.Services;
+namespace WageringStatsApi.Services;
 
 public interface IMessageProcessor
 {

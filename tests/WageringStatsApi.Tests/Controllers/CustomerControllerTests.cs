@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using WageringFeedConsumer.Controllers;
-using WageringFeedConsumer.Models;
-using WageringFeedConsumer.Repositories;
-using WageringFeedConsumer.Services;
+using WageringStatsApi.Controllers;
+using WageringStatsApi.Models;
+using WageringStatsApi.Repositories;
+using WageringStatsApi.Services;
 
-namespace WageringFeedConsumer.Tests.Controllers;
+namespace WageringStatsApi.Tests.Controllers;
 
 [TestFixture]
 public class CustomerControllerTests

@@ -2,10 +2,10 @@ using System.Net.WebSockets;
 using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Retry;
-using WageringFeedConsumer.Models;
-using WageringFeedConsumer.Repositories;
+using WageringStatsApi.Models;
+using WageringStatsApi.Repositories;
 
-namespace WageringFeedConsumer.Services;
+namespace WageringStatsApi.Services;
 
 public class WebSocketWorker : BackgroundService
 {
@@ -39,12 +39,11 @@ public class WebSocketWorker : BackgroundService
                 {
                     _logger.LogWarning(
                         args.Outcome.Exception,
-                        "WebSocket connection failed (attempt {AttemptNumber}/{MaxRetries})...",
+                        "WebSocket connection failed (attempt {AttemptNumber}/{MaxRetries}). Retrying in {Delay}...",
                         args.AttemptNumber + 1,
                         _config.MaxRetryAttempts,
                         args.RetryDelay);
 
-                        
                     return ValueTask.CompletedTask;
                 }
             })
@@ -95,36 +94,53 @@ public class WebSocketWorker : BackgroundService
         var buffer = new byte[4096];
         using var messageBuffer = new MemoryStream();
 
-        while (ws.State == WebSocketState.Open)
+        try
         {
-            var result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationToken);
-
-            if (result.MessageType == WebSocketMessageType.Close)
+            while (ws.State == WebSocketState.Open)
             {
-                await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", cancellationToken);
-                break;
+                var result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationToken);
+
+                if (result.MessageType == WebSocketMessageType.Close)
+                {
+                    await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
+                    break;
+                }
+
+                // DEVNOTE: we have to be clever here to handle messages that may be split across multiple frames
+                // and we assume those that do are not excessively large.
+
+                // 1. Accumulate chunks until we have the complete message
+                messageBuffer.Write(buffer, 0, result.Count);
+
+                if (!result.EndOfMessage) continue;
+
+                // 2. Process the complete message
+                var messageBytes = messageBuffer.GetBuffer().AsSpan(0, (int)messageBuffer.Length);
+                var shouldContinue = _messageProcessor.ProcessMessage(messageBytes);
+
+                // 3. Reset buffer for next message
+                messageBuffer.SetLength(0);
+
+                if (shouldContinue) continue;
+
+                _logger.LogInformation("EndOfFeed received. Closing connection.");
+                await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "EndOfFeed", CancellationToken.None);
+                return;
             }
-
-            // DEVNOTE: we have to be clever here to handle messages that may be split across multiple frames
-            // and we assume those that do are not excessively large.
-
-            // 1. Accumulate chunks until we have the complete message
-            messageBuffer.Write(buffer, 0, result.Count);
-
-            if (!result.EndOfMessage) continue;
-
-            // 2. Process the complete message
-            var messageBytes = messageBuffer.GetBuffer().AsSpan(0, (int)messageBuffer.Length);
-            var shouldContinue = _messageProcessor.ProcessMessage(messageBytes);
-
-            // 3. Reset buffer for next message
-            messageBuffer.SetLength(0);
-
-            if (shouldContinue) continue;
-
-            _logger.LogInformation("EndOfFeed received. Closing connection.");
-            await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "EndOfFeed", cancellationToken);
-            return;
+        }
+        catch (OperationCanceledException) when (ws.State == WebSocketState.Open)
+        {
+            // Try to send a graceful close before disposing
+            using var closeCts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+            try
+            {
+                await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Shutdown", closeCts.Token);
+            }
+            catch
+            {
+                // Best effort - if close fails, the using statement will abort anyway
+            }
+            throw;
         }
     }
 }

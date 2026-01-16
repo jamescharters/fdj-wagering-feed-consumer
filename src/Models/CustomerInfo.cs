@@ -1,3 +1,3 @@
-namespace WageringFeedConsumer.Models;
+namespace WageringStatsApi.Models;
 
 public record CustomerInfo(long Id, string CustomerName);

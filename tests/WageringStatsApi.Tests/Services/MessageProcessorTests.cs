@@ -2,11 +2,11 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Moq;
-using WageringFeedConsumer.Models.WebSockets;
-using WageringFeedConsumer.Repositories;
-using WageringFeedConsumer.Services;
+using WageringStatsApi.Models.WebSockets;
+using WageringStatsApi.Repositories;
+using WageringStatsApi.Services;
 
-namespace WageringFeedConsumer.Tests.Services;
+namespace WageringStatsApi.Tests.Services;
 
 [TestFixture]
 public class MessageProcessorTests

@@ -1,8 +1,8 @@
 using System.Text.Json;
 using Microsoft.Extensions.Options;
-using WageringFeedConsumer.Models;
-using WageringFeedConsumer.Repositories;
-using WageringFeedConsumer.Services;
+using WageringStatsApi.Models;
+using WageringStatsApi.Repositories;
+using WageringStatsApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

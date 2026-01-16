@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace WageringFeedConsumer.Repositories;
+namespace WageringStatsApi.Repositories;
 
 public interface IWageringDataRepository
 {
