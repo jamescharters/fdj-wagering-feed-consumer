@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Net.WebSockets;
 using Microsoft.Extensions.Options;
 using WageringFeedConsumer.Models;
@@ -34,8 +35,8 @@ public class WebSocketWorker(
 
                     logger.LogInformation("WebSocket Connected.");
 
-                    // DEVNOTE: buffer size of 4KB should be sufficient for messages based on observed examples
                     var buffer = new byte[4096];
+                    using var messageBuffer = new MemoryStream();
 
                     while (ws.State == WebSocketState.Open)
                     {
@@ -47,8 +48,22 @@ public class WebSocketWorker(
                             break;
                         }
 
-                        // DEVNOTE: we pass the buffer as a ReadOnlySpan<byte> to avoid allocating a new string for each message
-                        if (messageProcessor.ProcessMessage(buffer.AsSpan(0, result.Count))) continue;
+                        // DEVNOTE: we have to be clever here to handle messages that may be split across multiple frames
+                        // and we assume those that do are not excessively large.
+
+                        // 1. Accumulate chunks until we have the complete message
+                        messageBuffer.Write(buffer, 0, result.Count);
+                        
+                        if (!result.EndOfMessage) continue;
+                        
+                        // 2. Process the complete message
+                        var messageBytes = messageBuffer.GetBuffer().AsSpan(0, (int)messageBuffer.Length);
+                        var shouldContinue = messageProcessor.ProcessMessage(messageBytes);
+                        
+                        // 3. Reset buffer for next message
+                        messageBuffer.SetLength(0);
+                        
+                        if (shouldContinue) continue;
 
                         logger.LogInformation("EndOfFeed received. Closing connection.");
                         await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "EndOfFeed", sessionCts.Token);
