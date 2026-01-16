@@ -92,6 +92,79 @@ public class CustomerServiceTests
         _repositoryMock.Verify(x => x.Add(customerId, It.Is<CustomerInfo>(c => c.CustomerName == "API Customer")), Times.Once);
     }
 
+    [Test]
+    public async Task GetCustomerAsync_ApiReturnsNull_ReturnsNullAndDoesNotCache()
+    {
+        const long customerId = 789;
+        CustomerInfo? nullCustomer = null;
+
+        _repositoryMock
+            .Setup(x => x.TryGet(customerId, out nullCustomer))
+            .Returns(false);
+
+        SetupHttpResponse(HttpStatusCode.OK, (CustomerInfo?)null);
+
+        var result = await _service.GetCustomerAsync(customerId);
+
+        Assert.That(result, Is.Null);
+        _repositoryMock.Verify(x => x.Add(It.IsAny<long>(), It.IsAny<CustomerInfo>()), Times.Never);
+    }
+
+
+
+    [Test]
+    public async Task GetCustomerAsync_HttpException_ReturnsNull()
+    {
+        const long customerId = 999;
+        CustomerInfo? nullCustomer = null;
+
+        _repositoryMock
+            .Setup(x => x.TryGet(customerId, out nullCustomer))
+            .Returns(false);
+
+        _httpHandlerMock
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .ThrowsAsync(new HttpRequestException("Connection failed"));
+
+        var result = await _service.GetCustomerAsync(customerId);
+
+        Assert.That(result, Is.Null);
+        _repositoryMock.Verify(x => x.Add(It.IsAny<long>(), It.IsAny<CustomerInfo>()), Times.Never);
+    }
+
+    [Test]
+    public async Task GetCustomerAsync_BuildsCorrectUrl()
+    {
+        const long customerId = 123;
+        CustomerInfo? nullCustomer = null;
+        HttpRequestMessage? capturedRequest = null;
+
+        _repositoryMock
+            .Setup(x => x.TryGet(customerId, out nullCustomer))
+            .Returns(false);
+
+        _httpHandlerMock
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .Callback<HttpRequestMessage, CancellationToken>((req, _) => capturedRequest = req)
+            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = JsonContent.Create(new CustomerInfo(customerId, "Test"))
+            });
+
+        await _service.GetCustomerAsync(customerId);
+
+        Assert.That(capturedRequest, Is.Not.Null);
+        Assert.That(capturedRequest!.RequestUri!.ToString(),
+            Is.EqualTo("http://my-test-api.com.au/customer?customerId=123&candidateId=some-candidate-id"));
+    }
     
     private void SetupHttpResponse(HttpStatusCode statusCode, CustomerInfo? content)
     {
