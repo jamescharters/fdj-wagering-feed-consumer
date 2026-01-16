@@ -25,7 +25,7 @@ public class MessageProcessor(ILogger<MessageProcessor> logger, IWageringDataRep
 
             if (message == null) return true;
             
-            logger.LogDebug("Attempting to process {MessageType} message.", message.Type);
+            logger.LogDebug("Received {MessageType} message.", message.Type);
             
             switch (message.Type)
             {
@@ -37,6 +37,7 @@ public class MessageProcessor(ILogger<MessageProcessor> logger, IWageringDataRep
                     return false;
                     
                 case MessageType.BetPlaced:
+                    logger.LogDebug("Handling {MessageType} message (customer {CustomerId}).", message.Type, message.Payload.GetProperty("CustomerId"));
                     HandleBetPlaced(message.Payload);
                     break;
                     

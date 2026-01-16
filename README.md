@@ -4,7 +4,7 @@
 
 This application was developed and tested on macOS. Ensure that the following are installed:
 
-- .NET 10 (or Docker)
+- Docker
 
 ## Code
 
@@ -13,44 +13,7 @@ git clone https://github.com/jamescharters/fdj-wagering-feed-consumer.git
 cd fdj-wagering-feed-consumer
 ```
 
-## Configuration
-
-Before running, set the candidate ID in `appsettings.json` or `appsettings.Development.json`:
-
-```json
-{
-  "WageringFeed": {
-    "CandidateId": "value"
-  }
-}
-
-```
-
-## Build
-
-```bash
-dotnet build
-```
-
-## Run
-
-```bash
-dotnet run
-```
-
-The API will start and begin consuming the wagering feed via the specified WebSocket.
-
-The application runs on `http://localhost:5000` (or as configured in `launchSettings.json`).
-
-To query a specific customer, invoke a GET (via cURL) or point your web browser to `http://localhost:5000/customer/<customerId>/stats` where `customerID` is a known customer ID number.
-
-## API Documentation
-
-Swagger UI is available at `http://localhost:5000/swagger` and the OpenAPI spec can be found at `http://localhost:5000/openapi/v1.json`.
-
-## Docker
-
-Alternatively, you can run the application using Docker:
+## Run (Docker)
 
 ```bash
 # Build the image

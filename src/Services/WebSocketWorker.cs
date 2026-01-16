@@ -12,6 +12,7 @@ public class WebSocketWorker : BackgroundService
     private readonly ILogger<WebSocketWorker> _logger;
     private readonly IWageringDataRepository _wageringDataRepository;
     private readonly IMessageProcessor _messageProcessor;
+    private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly WageringFeedConfig _config;
     private readonly ResiliencePipeline _retryPipeline;
 
@@ -19,11 +20,13 @@ public class WebSocketWorker : BackgroundService
         ILogger<WebSocketWorker> logger,
         IWageringDataRepository wageringDataRepository,
         IMessageProcessor messageProcessor,
+        IHostApplicationLifetime applicationLifetime,
         IOptions<WageringFeedConfig> wageringFeedConfig)
     {
         _logger = logger;
         _wageringDataRepository = wageringDataRepository;
         _messageProcessor = messageProcessor;
+        _applicationLifetime = applicationLifetime;
         _config = wageringFeedConfig.Value;
 
         // DEVNOTE: add some resilience when trying to connect to the WebSocket
@@ -65,6 +68,8 @@ public class WebSocketWorker : BackgroundService
             {
                 await ConnectAndProcessAsync(wsUrl, ct);
             }, sessionCts.Token);
+
+            _wageringDataRepository.MarkFeedComplete();
         }
         catch (OperationCanceledException)
         {
@@ -75,11 +80,10 @@ public class WebSocketWorker : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "WebSocket connection failed after {MaxRetries} attempts. Giving up.", _config.MaxRetryAttempts);
-        }
-        finally
-        {
-            _wageringDataRepository.MarkFeedComplete();
+            _logger.LogError(ex, "WebSocket connection failed after {MaxRetries} attempts. Terminating application due to unrecoverable WebSocket connection failure.", _config.MaxRetryAttempts);
+
+            // DEVNOTE: unrecoverable error if we cannot establish the WebSocket connection - stop the application
+            _applicationLifetime.StopApplication();
         }
     }
 
