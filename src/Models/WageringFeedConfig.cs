@@ -8,6 +8,7 @@ public class WageringFeedConfig
     public string WebSocketUrl { get; set; } = string.Empty;
     public string CustomerApiUrl { get; set; } = string.Empty;
     public int MaxFeedDurationMinutes { get; set; }
+    public int MaxRetryAttempts { get; set; } = 3;
 
     // DEVNOTE: Something like FluentValidation could be used here, but below is just done for simplicity's sake
     public void Validate()
