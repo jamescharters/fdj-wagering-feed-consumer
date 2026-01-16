@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WageringFeedConsumer.csproj" />
+    <ProjectReference Include="..\..\src\WageringFeedConsumer.csproj" />
   </ItemGroup>
 
 </Project>

@@ -3,17 +3,17 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 WORKDIR /src
 
 # Copy csproj and restore dependencies (layer caching optimisation)
-COPY WageringFeedConsumer.csproj .
+COPY src/WageringFeedConsumer.csproj .
 RUN dotnet restore WageringFeedConsumer.csproj
 
 # Copy source and publish (exclude test project)
-COPY Controllers/ Controllers/
-COPY Models/ Models/
-COPY Properties/ Properties/
-COPY Repositories/ Repositories/
-COPY Services/ Services/
-COPY Program.cs .
-COPY appsettings*.json .
+COPY src/Controllers/ Controllers/
+COPY src/Models/ Models/
+COPY src/Properties/ Properties/
+COPY src/Repositories/ Repositories/
+COPY src/Services/ Services/
+COPY src/Program.cs .
+COPY src/appsettings*.json .
 RUN dotnet publish WageringFeedConsumer.csproj -c Release -o /app --no-restore
 
 # Runtime stage

@@ -1,5 +1,5 @@
-bin/
-obj/
+**/bin/
+**/obj/
 .git/
 .gitignore
 .idea/
@@ -7,5 +7,5 @@ obj/
 *.md
 *.user
 *.suo
-WageringFeedConsumer.Tests/
+tests/
 TestResults/
