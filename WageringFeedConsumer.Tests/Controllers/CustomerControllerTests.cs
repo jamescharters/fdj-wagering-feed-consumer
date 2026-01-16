@@ -56,13 +56,23 @@ public class CustomerControllerTests
 
 
     [Test]
-    public async Task GetCustomerStats_CustomerNotFound_ReturnsNotFound()
+    public async Task GetCustomerStats_CustomerExistsButNoBets_ReturnsOkWithZero()
     {
         const long customerId = 999;
         _repositoryMock.Setup(x => x.GetTotalStandToWin(customerId)).Returns((decimal?)null);
         
         var result = await _controller.GetCustomerStats(customerId, CancellationToken.None);
-        Assert.That(result, Is.InstanceOf<NotFoundResult>());
+        
+        Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        var okResult = (OkObjectResult)result;
+        var response = okResult.Value as CustomerStatResponse;
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(response!.CustomerId, Is.EqualTo(customerId));
+            Assert.That(response.TotalStandToWin, Is.EqualTo(0m));
+            Assert.That(response.Name, Is.EqualTo("Test Customer"));
+        });
     }
 
     [Test]
